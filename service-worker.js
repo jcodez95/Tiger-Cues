@@ -5,7 +5,7 @@
 // anything not precached. Bump CACHE_NAME whenever shell files change so
 // clients pick up the new version instead of serving stale cached files.
 
-const CACHE_NAME = "cuesheet-shell-v11";
+const CACHE_NAME = "cuesheet-shell-v12";
 
 const SHELL_ASSETS = [
   "./",
