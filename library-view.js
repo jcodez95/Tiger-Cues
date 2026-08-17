@@ -79,10 +79,32 @@ export function initLibraryView({ showView, engine, onFileOpened }) {
 
     try {
       const text = await file.text();
-      const { file: fileInfo, timestamps } = parseCuesheetImport(text);
-      const fingerprintId = computeFingerprint(fileInfo);
+     const { file: fileInfo, timestamps } = parseCuesheetImport(text);
+const cuesheetFingerprintId = computeFingerprint(fileInfo);
 
-      const existingFile = await getFile(fingerprintId);
+// Mobile browsers can report MP3 duration slightly differently.
+// Match the cue sheet to an existing audio file by filename/size first.
+let existingFile = await getFile(cuesheetFingerprintId);
+
+if (!existingFile) {
+  const allFiles = await getAllFiles();
+  const cueName = String(fileInfo.filename || "").trim().toLowerCase();
+
+  existingFile =
+    allFiles.find(
+      (f) =>
+        String(f.filename || "").trim().toLowerCase() === cueName &&
+        Number(f.fileSize) === Number(fileInfo.fileSize)
+    ) ||
+    allFiles.find(
+      (f) => String(f.filename || "").trim().toLowerCase() === cueName
+    ) ||
+    null;
+}
+
+// Use the actual audio file's fingerprint when we found it.
+const fingerprintId =
+  existingFile?.fingerprintId || cuesheetFingerprintId;
       if (!existingFile) {
         // No local entry for this file yet — create a metadata-only one
         // (no cached audio). It'll show "Needs re-select" until the user
